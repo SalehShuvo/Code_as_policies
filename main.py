@@ -5,7 +5,9 @@ import numpy as np
 import threading
 import copy
 import openai
+from openai import OpenAI
 import cv2
+from dotenv import load_dotenv
 # from google.colab.patches import cv2_imshow
 # from moviepy.editor import ImageSequenceClip
 
@@ -16,14 +18,25 @@ import astunparse
 from time import sleep
 from shapely.geometry import *
 from shapely.affinity import *
-from openai.error import RateLimitError, APIConnectionError
+# from openai.error import RateLimitError, APIConnectionError
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import TerminalFormatter
 
-openai_api_key = ''
+# Load environment variables from .env file
+load_dotenv()
+
+# Retrieve OpenAI API key from environment variables
+openai_api_key = os.getenv('OPENAI_API_KEY')
+if not openai_api_key:
+  raise ValueError("OPENAI_API_KEY not found in .env file")
+
 openai.api_key = openai_api_key
+
 from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
+
+# OpenAI client
+client = OpenAI(api_key=openai_api_key)
 
 
 class LMP:
@@ -68,15 +81,23 @@ class LMP:
 
         while True:
             try:
-                code_str = openai.Completion.create(
-                    prompt=prompt,
-                    stop=self._stop_tokens,
-                    temperature=self._cfg['temperature'],
-                    engine=self._cfg['engine'],
-                    max_tokens=self._cfg['max_tokens']
-                )['choices'][0]['text'].strip()
-                break
-            except (RateLimitError, APIConnectionError) as e:
+              code_str = client.chat.completions.create(
+                messages= [
+                    {
+                        'role': 'user',
+                        'content': prompt,
+                    },
+                ],
+                model = "gpt-4o-mini",
+                # stop=self._stop_tokens,
+                temperature = self._cfg['temperature'],
+                # engine=self._cfg['engine'],
+                # max_tokens=self._cfg['max_tokens']
+              )
+              code_str = code_str.choices[0].message.content.strip()
+              code_str = code_str.replace('```python', '').replace('```', '')
+              break
+            except (openai.RateLimitError, openai.APIConnectionError) as e:
                 print(f'OpenAI API got err {e}')
                 print('Retrying after 10s.')
                 sleep(10)
@@ -136,7 +157,7 @@ class LMPFGen:
                     max_tokens=self._cfg['max_tokens']
                 )['choices'][0]['text'].strip()
                 break
-            except (RateLimitError, APIConnectionError) as e:
+            except (openai.RateLimitError, openai.APIConnectionError) as e:
                 print(f'OpenAI API got err {e}')
                 print('Retrying after 10s.')
                 sleep(10)
