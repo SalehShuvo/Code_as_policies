@@ -3,7 +3,7 @@ scipy
 shapely 
 astunparse 
 pygments 
-openai==0.28
+openai
 imageio==2.4.1 
 imageio-ffmpeg 
 pybullet 
