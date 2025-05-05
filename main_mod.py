@@ -66,10 +66,6 @@ class LMP:
         self._fixed_vars = fixed_vars
         self._variable_vars = variable_vars
         self.exec_hist = ''
-        # api_key = os.environ.get("OPENAI_API_KEY", "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")
-        # if not api_key:
-        #     raise ValueError("No OpenAI API key provided")
-        # openai.api_key = api_key
     
     def clear_exec_hist(self):
         self.exec_hist = ''
