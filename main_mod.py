@@ -7,7 +7,7 @@ import copy
 import openai
 import cv2
 import subprocess
-import pygame
+# import pygame
 
 # from openai.error import OpenAIError  # Catch all OpenAI-specific errors
 
@@ -23,16 +23,16 @@ os.environ["FFMPEG_BINARY"] = ffmpeg.get_ffmpeg_exe()
 ##########----- EDIT THIS SECTION------##############
 
 model_name = 'gpt-3.5-turbo'
-openai_api_key = 'PUT YOUR KEY HERE'
+# openai_api_key = 'PUT YOUR KEY HERE'
 
 ##########-----------------------------##############
 
 
 
-openai.api_key = openai_api_key
+# openai.api_key = openai_api_key
 
 
-from moviepy.editor import ImageSequenceClip
+from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
 
 # imports for LMPs
 import shapely
@@ -98,7 +98,7 @@ class LMP:
                 response = openai.chat.completions.create(
                 model=self._cfg['engine'],  # Use 'model' instead of 'engine' (e.g., "gpt-3.5-turbo")
                 messages=[
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 stop=self._stop_tokens,
                 temperature=self._cfg['temperature'],
@@ -164,8 +164,9 @@ class LMPFGen:
                 model=self._cfg['engine'],  # Changed from 'engine' to 'model'
                 messages=[{
                     "role": "user",
-                    "content": prompt
-                }],
+                    "content": prompt,
+                }
+                ],
                 stop=self._stop_tokens,
                 temperature=self._cfg['temperature'],
                 max_tokens=self._cfg['max_tokens']
@@ -1550,8 +1551,8 @@ def setup_LMP(env, cfg_tabletop):
   
 #-----------ENVIRONMENT PARAMETERS SLIGHTLY MODIFIED-----------------
 
-num_blocks = 3 #@param {type:"slider", min:0, max:4, step:1}
-num_bowls = 3 #@param {type:"slider", min:0, max:4, step:1}
+num_blocks = 4 #@param {type:"slider", min:0, max:4, step:1}
+num_bowls = 4 #@param {type:"slider", min:0, max:4, step:1}
 high_resolution = False #@param {type:"boolean"}
 high_frame_rate = False #@param {type:"boolean"}
 
@@ -1568,12 +1569,18 @@ print(obj_list)
 
 
 #---------------DEMO SLIGHTLY EDITED FOR TERMINAL------------
-
-print('Input a command for the robot')
+print('Write \'close\' to terminate the program')
 
 while True:
+  # save the current state of the environment
+  image = env.get_camera_image()
+  image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+  cv2.imwrite("env_view.png", image_rgb)
 
   user_input = input() #@param {allow-input: true, type:"string"}
+  if user_input.strip()=='close':
+    pybullet.disconnect()
+    break
 
   env.cache_video = []
 
@@ -1584,9 +1591,9 @@ while True:
   if env.cache_video:
     rendered_clip = ImageSequenceClip(env.cache_video, fps=35 if high_frame_rate else 25)
     rendered_clip.write_videofile('Demo.mp4')
-    rendered_clip.preview() #Install pygame for this '''pip install pygame'''
-  pygame.display.quit()
-  sleep(2)
+    # rendered_clip.preview() #Install pygame for this '''pip install pygame'''
+  # pygame.display.quit()
+  # sleep(2)
   print('Waiting for the next command...')
  
    
