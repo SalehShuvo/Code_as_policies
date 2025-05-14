@@ -4,7 +4,7 @@ shapely
 astunparse 
 pygments 
 openai==1.76.2
-imageio==2.4.1 
+imageio==2.37.0
 imageio-ffmpeg 
 pybullet 
 moviepy
