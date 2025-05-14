@@ -10,3 +10,4 @@ pybullet
 moviepy
 requests 
 opencv-python
+dotenv
