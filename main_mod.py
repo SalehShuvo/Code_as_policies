@@ -6,30 +6,30 @@ import threading
 import copy
 import openai
 import cv2
-import subprocess
-# import pygame
+from dotenv import load_dotenv
 
-# from openai.error import OpenAIError  # Catch all OpenAI-specific errors
+import subprocess
+
 
 from time import sleep
 
-# from google.colab.patches import cv2.imshow
 import imageio_ffmpeg as ffmpeg
 
 # Set FFmpeg binary to the one from imageio_ffmpeg
 os.environ["FFMPEG_BINARY"] = ffmpeg.get_ffmpeg_exe()
 
-
-##########----- EDIT THIS SECTION------##############
-
 model_name = 'gpt-3.5-turbo'
-# openai_api_key = 'PUT YOUR KEY HERE'
 
-##########-----------------------------##############
+# Load environment variables from .env file
+load_dotenv()
 
+# Retrieve OpenAI API key from .env
+openai_api_key = os.getenv('OPENAI_API_KEY')
+if not openai_api_key:
+  raise ValueError("OPENAI_API_KEY not found in .env file")
 
+openai.api_key = openai_api_key
 
-# openai.api_key = openai_api_key
 
 
 from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
@@ -512,6 +512,7 @@ class PickPlaceEnv():
             obj_xyz = np.concatenate((obj_xyz, rand_xyz), axis=0)
             break
           else:
+            # Compute nearest neighbour distance
             nn_dist = np.min(np.linalg.norm(obj_xyz - rand_xyz, axis=1)).squeeze()
             if nn_dist > 0.15:
               obj_xyz = np.concatenate((obj_xyz, rand_xyz), axis=0)
@@ -1551,10 +1552,10 @@ def setup_LMP(env, cfg_tabletop):
   
 #-----------ENVIRONMENT PARAMETERS SLIGHTLY MODIFIED-----------------
 
-num_blocks = 4 #@param {type:"slider", min:0, max:4, step:1}
-num_bowls = 4 #@param {type:"slider", min:0, max:4, step:1}
-high_resolution = False #@param {type:"boolean"}
-high_frame_rate = False #@param {type:"boolean"}
+num_blocks = 3 #@param {type:"slider", min:0, max:4, step:1}
+num_bowls = 3 #@param {type:"slider", min:0, max:4, step:1}
+high_resolution = True #@param {type:"boolean"}
+high_frame_rate = True #@param {type:"boolean"}
 
 # setup env and LMP
 env = PickPlaceEnv(render=True, high_res=high_resolution, high_frame_rate=high_frame_rate)
@@ -1591,9 +1592,6 @@ while True:
   if env.cache_video:
     rendered_clip = ImageSequenceClip(env.cache_video, fps=35 if high_frame_rate else 25)
     rendered_clip.write_videofile('Demo.mp4')
-    # rendered_clip.preview() #Install pygame for this '''pip install pygame'''
-  # pygame.display.quit()
-  # sleep(2)
   print('Waiting for the next command...')
  
    
